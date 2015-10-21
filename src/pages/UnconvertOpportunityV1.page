@@ -1,0 +1,106 @@
+<apex:page controller="UnconvertOpportunityV1">
+    <apex:form >
+        <apex:sectionHeader title="Unconvert Opportunity"
+            subtitle="{!CurrentOpp.Account.name}" />
+
+        <apex:pageBlock mode="edit">
+        <apex:pageMessages />
+
+
+            <apex:pageBlockButtons >
+
+                <apex:commandButton title="Unconvert" id="unconvert"
+                    action="{!unconvert}" value="Unconvert" />
+                <apex:commandButton title="cancel" id="cancel" action="{!cancel}"
+                    value="Cancel" />
+
+            </apex:pageBlockButtons>
+
+            
+
+
+            <!-- 
+
+    <apex:pageBlock id="all" title="Change Primary Contact" mode="detail" >
+
+        <apex:pageBlockButtons location="top" >
+            <apex:commandButton value="Go Back" action="{!GoBack}" />                    
+        </apex:pageBlockButtons>
+        
+        <apex:outputText value="The primary contact for the account is {!PrimaryContact.Name}." rendered="{! NOT ISNULL(PrimaryContact)}" style="font-weight:bold;" />
+        <apex:outputText value="No primary contact is set for the account." rendered="{!ISNULL(PrimaryContact)}" style="font-weight:bold;" />
+        <br/><br/>
+        
+        <apex:selectRadio value="{!selectedContactId}" layout="pageDirection" >
+            <apex:selectOptions value="{!ContactOptions}"/>
+            <apex:actionSupport event="onchange" action="{!ToggleDisplay}" rerender="all" />
+        </apex:selectRadio>
+    </apex:pageBlock>         
+
+
+ -->
+
+            <apex:pageBlockSection id="leadNameSection"
+                title="Lead Name" columns="1">
+
+                <apex:selectRadio value="{!leadInputOp}" rendered="{!emptyList==false}">
+
+                    <apex:selectOption itemValue="true"
+                        itemLabel="Choose Label From List" />
+
+                    <apex:selectOption itemValue="false"
+                        itemLabel="Input Custom Lead Name" />
+
+                    <apex:actionSupport event="onchange" action="{!leadInputSelect}" rerender="leadNameSection" />
+
+                </apex:selectRadio>
+
+                <apex:selectList title="Contact to use for Lead name"
+                    label="Lead Name" size="1" value="{!selectedValue}"
+                    rendered="{!leadInputSelect && not(emptyList)}">
+
+                    <apex:selectOptions value="{!ContactOptions}" />
+
+                </apex:selectList>
+
+                <apex:inputText label="First Name: "
+                    rendered="{! emptyList || not(leadInputSelect)}" value="{!firstName}" />
+                <apex:inputText label="Last Name: "
+                    rendered="{! emptyList || not(leadInputSelect)}"  value="{!lastName}"/>
+                    
+            </apex:pageBlockSection>
+
+            <apex:pageBlockSection title="Opportunity Related Records to Move/Copy"
+                columns="1">
+
+              <apex:inputCheckbox label="Notes and Attachments" value="{!copyNotesAndAttachments}" /> 
+                    
+                <apex:inputCheckbox label="Events" value="{!eventCopy}" />
+                <apex:inputCheckbox label="Tasks" value="{!taskCopy}" /> 
+
+            </apex:pageBlockSection>
+              <apex:pageblocksection title="Opportunity Related Records to be deleted"
+                columns="1">
+                <apex:message for="wrapTable" id="contactDeleteAlert" />
+                <apex:PageBlockTable id="wrapTable" value="{!recordsToDelete}"
+                    var="wrap" styleClass="list">
+                    <apex:column headerValue="Name" value="{!wrap.objectName}" />
+                    <apex:column headerValue="Type" value="{!wrap.objectType}" />
+
+                    <apex:column headerValue="Delete After Unconvert">
+                        <apex:inputCheckbox value="{!wrap.selectedtoDelete}" />
+                    </apex:column>
+
+                </apex:PageBlockTable>
+
+              </apex:pageBlockSection>
+
+            
+
+            
+        </apex:pageBlock>
+
+
+    </apex:form>
+
+</apex:page>

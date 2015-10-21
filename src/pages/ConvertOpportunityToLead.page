@@ -1,0 +1,31 @@
+<apex:page controller="Convert">
+ 	<apex:form >
+        <apex:sectionHeader title="Opportunity Convert" subtitle="{!oppToConvert.name}"/>
+        <apex:outputText value="{!functionDescription}"/>
+ 
+ 	<apex:pageBlock mode="detail" rendered="{!opportunityError}">
+ 		<apex:pageblockbuttons >
+        	<apex:commandButton value="Back" action="{!cancel}"/>
+        </apex:pageblockbuttons>
+        <apex:outputtext value="{!errorMsg}"/>
+ 	</apex:pageBlock>
+ 	      
+    <apex:pageBlock mode="detail" rendered="{!Not(opportunityError)}">
+ 
+        <apex:pageblockbuttons >
+            <apex:commandButton value="Convert" action="{!convertToLead}"/>
+        	<apex:commandButton value="Cancel" action="{!cancel}"/>
+        </apex:pageblockbuttons>
+        <apex:pageBlockSection title="Lead Details" columns="1">
+            <apex:outputText value="{!errorMsg}" />
+            <apex:inputField value="{!inputLead.firstName}"/>
+            <apex:inputField value="{!inputLead.lastName}"/>
+            <apex:inputField value="{!inputLead.company}"/>
+            <apex:inputCheckBox label="Transfer Attachments, Notes, tasks, or events to new lead" value="{!transferContent}" />
+			
+        </apex:pageBlockSection>
+        
+    </apex:pageBlock>
+    </apex:form>
+    
+</apex:page>
