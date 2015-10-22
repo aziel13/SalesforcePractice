@@ -1,0 +1,144 @@
+<apex:page controller="UnconvertOpportunity">
+    <apex:form >
+        <style type="text/css">  
+                .panelAdjust{
+                    padding-right:4px;
+                    float:left;
+            }
+       .standardLabel{
+           font-weight:700;
+           color:#4a4a56;
+           
+           font-size: 12px;
+        }
+        .standardOutput{
+            display: block;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            height: auto;
+            font-weight:350;
+            color:#4a4a56;
+        }
+        .imgclass:hover {  
+            background-image: url(/img/help/helpOrbs.gif);  
+            background-repeat: no-repeat;  
+            width: 16px;  
+            height: 15px;     
+            background-position: right;  
+        }
+        .imgclass {  
+            background-image: url(/img/help/helpOrbs.gif);  
+            background-repeat: no-repeat;  
+            width: 16px;  
+            height: 15px;  
+        }
+        </style> 
+        <apex:sectionHeader title="Unconvert Opportunity" subtitle="{!CurrentOpp.Account.name}" />
+            <apex:pageBlock mode="edit" rendered="{!leadOutput==null}">
+            <apex:pageMessages />
+            <apex:pageBlockButtons >
+                <apex:commandButton title="Unconvert" id="unconvert" action="{!unconvert}" value="Unconvert" onclick="return confirm('Are you sure you want to unconvert this opportunity?');"/>
+                <apex:commandButton title="cancel" id="cancel" action="{!cancel}" value="Cancel" />
+            </apex:pageBlockButtons>
+
+            <apex:pageBlockSection id="leadNameSection" title="Lead Name to Use" columns="2" >
+                
+                <apex:pageBlockSectionItem >
+                    
+                    <apex:selectRadio value="{!leadInputOp}" layout="pageDirection" disabled="{!emptyList}">
+                        <apex:selectOption itemValue="true" itemLabel="Choose Label From List" />
+                        <apex:selectOption itemValue="false" itemLabel="Input Custom Lead Name" />
+                        <apex:actionSupport event="onchange" action="{!leadInputSelect}" rerender="leadNameSection" />
+                    </apex:selectRadio>
+                </apex:pageBlockSectionItem>
+                
+                <!--  Displayed if there are existing contact to choose from -->
+                <apex:pageBlockSectionItem rendered="{!leadInputSelect && not(emptyList)}" >
+                    <apex:outputPanel layout="inline">
+                        <apex:outputLabel for="existCons" value="Contacts  " styleClass="standardLabel"  />
+                        <apex:selectList id="existCons" size="1" value="{!selectedValue}" >
+                            <apex:selectOptions value="{!ContactOptions}" />
+                        </apex:selectList>
+
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                
+                <!-- Displayed if a custom Lead Name is being input -->
+                <apex:pageBlockSectionItem rendered="{! emptyList || not(leadInputSelect)}">
+                    <apex:outputPanel > 
+                        <apex:pageMessage severity="warning" summary="Existing Contacts to use for Lead Name Not Found. Please input a Custom Lead Name." strength="3" rendered="{!leadInputSelect && emptyList}"/>
+                        <apex:outputLabel for="leadFirstName" value="First Name  " styleClass="standardLabel" />
+                        <apex:inputText id="leadFirstName" value="{!firstName}" />
+                        <br/>
+                        <apex:outputLabel for="leadLastName" value="Last Name  " styleClass="standardLabel" />
+                        <apex:inputText id="leadLastName" rendered="{! emptyList || not(leadInputSelect)}"  value="{!lastName}"/>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            
+            <apex:pageBlockSection id="companySection" title="Company Name to Use" columns="2">
+                <apex:pageBlockSectionItem >
+                    
+                    <apex:selectRadio layout="pageDirection" value="{!companyInputOp}" disabled="{!noAccount}">
+                        <apex:selectOption itemValue="true" itemLabel="Use Existing Company Name" />
+                        <apex:selectOption itemValue="false" itemLabel="Input Custom Company Name" />
+                        <apex:actionSupport event="onchange" action="{!companyInputSelect}" rerender="companySection" />
+                    </apex:selectRadio>
+                </apex:pageBlockSectionItem>
+                
+                <!--  Displayed if the associated account is known-->
+                <apex:pageBlockSectionItem rendered="{!companyInputSelect && noAccount==false}">
+                    <apex:outputPanel >
+                        <apex:outputLabel for="existingAccount"  value="Company Name " styleClass="standardLabel"  />
+                        <apex:outputText id="existingAccount" value="{!CurrentOpp.Account.name}" />
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>  
+                 
+                 <!-- Displayed if a custom company name is being input -->
+                <apex:pageBlockSectionItem rendered="{!companyInputSelect==false || noAccount}">
+                    <apex:outputPanel styleclass="panelAdjust">
+                        <apex:pageMessage severity="warning" summary="Existing Company Name Not Found. Please input a Custom Company Name." strength="3" rendered="{!companyInputSelect && noAccount==true}"/>
+                        <apex:outputLabel for="companyNameCustomInput" value="Company Name " styleClass="standardLabel" />
+                        <apex:inputText id="companyNameCustomInput" value="{!companyName}" />
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>  
+                
+            </apex:pageBlockSection>
+                
+            <apex:pageBlockSection id="leadStatusSection" title="Lead Status to Use" columns="2">
+                <apex:inputField id="leadStatus" value="{!newLead.status}" />
+            </apex:pageBlockSection>
+
+            <apex:pageblocksection title="Opportunity Related Record Options" columns="1">
+                <apex:message for="wrapTable" id="contactDeleteAlert" />
+                <apex:PageBlockTable id="wrapTable" value="{!recordsToDelete}" var="wrap" styleClass="list">
+                    <apex:column headerValue="Record Name" value="{!wrap.objectName}" />
+                    <apex:column headerValue="Type" value="{!wrap.objectType}" />
+                    <apex:column headerValue="Delete After Unconvert">
+                        <apex:inputCheckbox disabled="{!wrap.preventDelete}" value="{!wrap.selectedtoDelete}" />
+                    </apex:column>
+                    <apex:column headerValue="Reparent Notes and Attachments">
+                        <apex:inputCheckbox value="{!wrap.noteAttachCopy}" />
+                    </apex:column>
+                    <apex:column headerValue="Reparent Events">
+                        <apex:inputCheckbox value="{!wrap.eventCopy}" />
+                    </apex:column>
+                    <apex:column headerValue="Reparent Tasks">
+                        <apex:inputCheckbox value="{!wrap.taskCopy}" />
+                    </apex:column>
+                </apex:PageBlockTable>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:pageBlock rendered="{!leadOutput!=null}">
+            <apex:pageMessages />
+            <apex:outputPanel >
+                <br/>
+                <apex:outputText value="New Lead: " styleClass="standardLabel"/>
+                <apex:outputLink value="{!leadOutput}" styleClass="standardLabel">
+                    {!newLead.firstName} {!newLead.lastName}
+                </apex:outputLink>
+            </apex:outputPanel>
+            
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
